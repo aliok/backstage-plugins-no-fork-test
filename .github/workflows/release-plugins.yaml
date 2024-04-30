@@ -25,6 +25,11 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "github.event.ref: ${{ github.event.ref }}"
+          echo "github.event.base_ref: ${{ github.event.base_ref }}"
+          BRANCH=$(echo ${{ github.event.ref }} | sed 's/refs\/heads\///')
+          echo "BRANCH: $BRANCH"
+          BRANCH2=$(git rev-parse --abbrev-ref HEAD)
+          echo "BRANCH2: $BRANCH2"
           echo "RELEASE_NAME=${{ github.event.ref }}" >> $GITHUB_ENV
 
       - name: Setup Node.js
