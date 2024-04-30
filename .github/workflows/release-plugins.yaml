@@ -24,13 +24,12 @@ jobs:
       - name: Setup release name for release branch push
         if: github.event_name == 'push'
         run: |
-          echo "github.event.ref: ${{ github.event.ref }}"
-          echo "github.event.base_ref: ${{ github.event.base_ref }}"
-          BRANCH=$(echo ${{ github.event.ref }} | sed 's/refs\/heads\///')
-          echo "BRANCH: $BRANCH"
-          BRANCH2=$(git rev-parse --abbrev-ref HEAD)
-          echo "BRANCH2: $BRANCH2"
-          echo "RELEASE_NAME=${{ github.event.ref }}" >> $GITHUB_ENV
+          BRANCH=$(git rev-parse --abbrev-ref HEAD) #e.g. release-v1.33
+          echo "Release branch: ${BRANCH}"
+          GO111MODULE=off go get -u github.com/openshift-knative/hack/cmd/sobranch
+          SO_RELEASE_NAME=$( $(go env GOPATH)/bin/sobranch --upstream-version "${BRANCH}") # input format: "release-v1.11" or "release-1.11" or "v1.11" or "1.11"
+          echo "SO_RELEASE_NAME: ${SO_RELEASE_NAME}"
+          echo "RELEASE_NAME=${SO_RELEASE_NAME}" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
