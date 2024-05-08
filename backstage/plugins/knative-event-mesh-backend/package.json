@@ -1,5 +1,5 @@
 {
-  "name": "@knative-extensions/plugin-knative-event-mesh-backend",
+  "name": "@aliok/backstage-plugins-no-fork-test",
   "version": "0.0.0-nightly",
   "main": "src/index.ts",
   "types": "src/index.ts",
