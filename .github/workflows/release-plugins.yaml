@@ -103,7 +103,6 @@ jobs:
           package: backstage/plugins/knative-event-mesh-backend
           registry: "https://npm.pkg.github.com"
           tag: latest
-          dry-run: true
 
       - name: Postpack knative-event-mesh-backend plugin
         shell: bash
