@@ -32,7 +32,9 @@ jobs:
           BRANCH=$(git rev-parse --abbrev-ref HEAD) #e.g. release-v1.33
           echo "Release branch: ${BRANCH}"
           
+          cd /tmp
           go get -u github.com/openshift-knative/hack/cmd/sobranch
+          cd -
           SO_RELEASE_NAME=$( $(go env GOPATH)/bin/sobranch --upstream-version "${BRANCH}") # input format: "release-v1.11" or "release-1.11" or "v1.11" or "1.11"
           # SO_RELEASE_NAME will be something like "release-1.33"
           echo "SO_RELEASE_NAME: ${SO_RELEASE_NAME}"
