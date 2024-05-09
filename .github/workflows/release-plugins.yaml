@@ -130,7 +130,6 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
           package: backstage/plugins/knative-event-mesh-backend
-          registry: "https://npm.pkg.github.com"
           tag: latest
 
       - name: Postpack knative-event-mesh-backend plugin
