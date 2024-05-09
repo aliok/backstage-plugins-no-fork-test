@@ -33,7 +33,9 @@ jobs:
           echo "Release branch: ${BRANCH}"
           
           cd /tmp
-          go get -u github.com/openshift-knative/hack/cmd/sobranch
+          git clone https://github.com/openshift-knative/hack.git
+          cd hack
+          go install ./cmd/sobranch
           cd -
           SO_RELEASE_NAME=$( $(go env GOPATH)/bin/sobranch --upstream-version "${BRANCH}") # input format: "release-v1.11" or "release-1.11" or "v1.11" or "1.11"
           # SO_RELEASE_NAME will be something like "release-1.33"
