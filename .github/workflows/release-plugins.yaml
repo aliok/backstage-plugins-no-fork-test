@@ -21,21 +21,49 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21.1' # from https://github.com/openshift-knative/hack/blob/main/go.mod#L3
+
       - name: Setup release name for release branch push
         if: github.event_name == 'push'
         run: |
           BRANCH=$(git rev-parse --abbrev-ref HEAD) #e.g. release-v1.33
           echo "Release branch: ${BRANCH}"
-          GO111MODULE=off go get -u github.com/openshift-knative/hack/cmd/sobranch
+          
+          go get -u github.com/openshift-knative/hack/cmd/sobranch
           SO_RELEASE_NAME=$( $(go env GOPATH)/bin/sobranch --upstream-version "${BRANCH}") # input format: "release-v1.11" or "release-1.11" or "v1.11" or "1.11"
           # SO_RELEASE_NAME will be something like "release-1.33"
           echo "SO_RELEASE_NAME: ${SO_RELEASE_NAME}"
+          
           # split the release name to get the version number
-          ## e.g. release-1.33 -> v1.33
+          ## e.g. release-1.33 -> 1.33
           BASE_RELEASE_VERSION=${SO_RELEASE_NAME#*-}
           echo "BASE_RELEASE_VERSION: ${BASE_RELEASE_VERSION}"
-          DATE_TIME=$(date +"%Y%m%d%H%M%S")
-          RELEASE_NAME="${BASE_RELEASE_VERSION}.0-${DATE_TIME}"
+          
+          RELEASE_NAME="${BASE_RELEASE_VERSION}.0"
+          
+          EXISTING_RELEASES=""
+          
+          if EXISTING_RELEASES=$(npm view @knative-tmp/backstage-plugins-no-fork-test versions --json); then
+            echo "Package information fetched successfully"
+            echo "Existing releases: ${EXISTING_RELEASES}"
+            PATCH_RELEASES=$(echo "${EXISTING_RELEASES}" | grep ${BASE_RELEASE_VERSION})
+            if [ -z "${PATCH_RELEASES}" ]; then
+              echo "No existing PATCH_RELEASES found for ${BASE_RELEASE_VERSION}"
+              echo "Going to publish a new .0 patch release"
+              RELEASE_NAME="${BASE_RELEASE_VERSION}.0"
+            else
+              echo "Existing PATCH_RELEASES found for ${BASE_RELEASE_VERSION}"
+              PATCH=$(echo "${PATCH_RELEASES}" | tail -1 | tr -d '"' | awk -F \. '{print $3+1}')
+              RELEASE_NAME="${BASE_RELEASE_VERSION}.${PATCH}"
+            fi
+          else
+            echo "Error fetching package information. Going to publish a new .0 patch release"
+            RELEASE_NAME="${BASE_RELEASE_VERSION}.0"
+          fi
+          
           echo "RELEASE_NAME: ${RELEASE_NAME}"
           echo "RELEASE_NAME=${RELEASE_NAME}" >> $GITHUB_ENV
 
@@ -50,10 +78,6 @@ jobs:
         run: |
           node --version
           yarn --version
-
-      - name: Print release name
-        run: |
-          echo "Release name: ${RELEASE_NAME}"
 
       - name: Install dependencies
         shell: bash
@@ -81,6 +105,7 @@ jobs:
           yarn build:all
 
       - name: Update version of knative-event-mesh-backend plugin
+        if: github.event_name == 'push'
         shell: bash
         working-directory: ./backstage/plugins/knative-event-mesh-backend
         run: |
