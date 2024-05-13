@@ -1,4 +1,4 @@
-# Knative Event Mesh plugin
+tesa # Knative Event Mesh plugin
 
 The Event Mesh plugin is a Backstage plugin that allows you to view and manage Knative Eventing resources.
 
