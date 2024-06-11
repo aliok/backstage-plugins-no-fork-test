@@ -1,5 +1,5 @@
 {
-  "name": "@knative-extensions/plugin-knative-event-mesh-backend-dynamic",
+  "name": "@aliok/plugin-knative-event-mesh-backend-dynamic",
   "version": "0.0.0-nightly",
   "main": "dist/index.cjs.js",
   "types": "dist/index.d.ts",
